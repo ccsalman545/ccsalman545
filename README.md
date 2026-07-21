@@ -308,6 +308,7 @@ There is no sponsor link enabled today; a star, constructive review, or document
 | IoT | [Arduino-IoT](https://github.com/ccsalman545/Arduino-IoT) | Arduino/ESP32 experiments and connected-device ideas. |
 | Robotics & AI | [FPGA-Vision-Processing](https://github.com/ccsalman545/FPGA-Vision-Processing) | Hardware-oriented vision experiments for autonomous systems. |
 | Web & portfolio | [muhammed-salman-portfolio](https://github.com/ccsalman545/muhammed-salman-portfolio) | The accessible, responsive site behind my personal presence. |
+| FPGA laboratory | [fpga-lab](https://github.com/ccsalman545/ccsalman545/tree/arena/019f8412-ccsalman545/fpga-lab) | M.Sc. Electronics FPGA lab journals — Verilog RTL, self-checking testbenches, XDC constraints, and full reports (Boolean Board / Spartan-7). |
 
 ---
 
