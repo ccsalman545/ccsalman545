@@ -19,13 +19,13 @@ jobs:
       - name: Check out profile repository
         uses: actions/checkout@v4
 
-      - name: Build latest public activity
+      - name: Render the latest public activity
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PROFILE_USERNAME: ccsalman545
         run: python3 .github/scripts/update_activity.py
 
-      - name: Commit refreshed activity when it changed
+      - name: Commit the refreshed activity block
         run: |
           if git diff --quiet -- README.md; then
             echo "README activity is already current."

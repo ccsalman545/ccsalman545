@@ -34,6 +34,17 @@ FORBIDDEN_PATTERNS = [
 ]
 
 RELATIVE_ASSET = re.compile(r"(?:src|srcset|href)=\"((?!https?://|#|mailto:)[^\"]+)\"")
+RELATIVE_LINK = re.compile(r"\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+
+
+def relative_targets(content: str) -> set[str]:
+    """Collect every repository-relative path referenced by the README."""
+    targets = set()
+    for match in RELATIVE_ASSET.findall(content) + RELATIVE_LINK.findall(content):
+        if match.startswith(("http://", "https://", "#", "mailto:", "data:")):
+            continue
+        targets.add(match)
+    return targets
 
 
 def main() -> int:
@@ -53,10 +64,10 @@ def main() -> int:
         elif content.index(start) > content.index(end):
             problems.append(f"Marker pair {start} / {end} is out of order.")
 
-    for path in sorted(set(RELATIVE_ASSET.findall(content))):
+    for path in sorted(relative_targets(content)):
         target = Path(path.split("?")[0].split("#")[0])
         if target.is_absolute() or not target.exists():
-            problems.append(f"Referenced asset does not exist: {path}")
+            problems.append(f"Referenced path does not exist: {path}")
         elif target.suffix.lower() == ".svg" and target.stat().st_size == 0:
             problems.append(f"SVG asset is empty: {path}")
 

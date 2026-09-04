@@ -226,9 +226,9 @@ My working orbit is **embedded systems, Embedded Linux, robotics, FPGA design, c
 <!-- ACTIVITY:START -->
 - **Push** — updated [ccsalman545/fedlock](https://github.com/ccsalman545/fedlock) to `main` · 18 days ago
 - **Push** — updated [ccsalman545/AiCoN](https://github.com/ccsalman545/AiCoN) to `main` · 25 days ago
+- **Starred** — bookmarked [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) · today
 - **Push** — updated [ccsalman545/ideal-broccoli](https://github.com/ccsalman545/ideal-broccoli) to `main` · 3 days ago
 - **Push** — updated [ccsalman545/legendary-chainsaw](https://github.com/ccsalman545/legendary-chainsaw) to `main` · 13 days ago
-- **Pull request** — merged a pull request in [ccsalman545/legendary-chainsaw](https://github.com/ccsalman545/legendary-chainsaw) · 13 days ago
 <!-- ACTIVITY:END -->
 
 ---
@@ -468,7 +468,7 @@ This profile is a **static README with dynamic modules**. Everything below the b
 | :-- | :-- | :-- |
 | Banner & dividers | Local SVG in [`assets/`](assets) — hand-built, theme-aware | On edit |
 | Animated roles | [readme-typing-svg](https://github.com/DenverCoder1/readme-typing-svg) | Live |
-| Counters & featured repos | [`update_repos.py`](.github/scripts/update_repos.py) via GitHub API | Weekly |
+| Counters & featured repos | [`update_repos.py`](.github/scripts/update_repos.py) via the GitHub API | Weekly |
 | Latest activity | [`update_activity.py`](.github/scripts/update_activity.py) via the Events API | Daily |
 | Latest writing | [blog-post-workflow](https://github.com/gautamkrishnar/blog-post-workflow) from `BLOG_RSS_URL` | Daily |
 | Stats, languages, streak | [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) · [streak-stats](https://github.com/DenverCoder1/github-readme-streak-stats) | Live |
@@ -478,6 +478,14 @@ This profile is a **static README with dynamic modules**. Everything below the b
 | Coding activity | [waka-readme](https://github.com/athul/waka-readme) | Daily (optional) |
 
 **Theme-aware rendering:** every card and the banner ship two variants and are swapped with `<picture>` + `prefers-color-scheme`, so the page looks native in both GitHub Light and GitHub Dark.
+
+**Enabling the schedules:** the six workflow files live in [`docs/workflow-templates/`](docs/workflow-templates) because GitHub does not let automated tooling write to `.github/workflows/`. Install them with:
+
+```bash
+bash scripts/enable-automation.sh
+```
+
+Then review, commit, push, and set **Settings → Actions → General → Workflow permissions** to *Read and write permissions*.
 
 **Operating guide:** see [`docs/PROFILE_SETUP.md`](docs/PROFILE_SETUP.md).
 

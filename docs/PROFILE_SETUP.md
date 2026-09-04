@@ -18,28 +18,44 @@ ccsalman545/
 │   ├── stars.json forks.json repos.json
 │   └── followers.json languages.json updated.json
 ├── .github/
-│   ├── scripts/
-│   │   ├── profile_common.py        # Shared API + marker helpers (stdlib only)
-│   │   ├── update_activity.py       # Daily public-activity renderer
-│   │   ├── update_repos.py          # Weekly repo table, counters, badge data
-│   │   ├── check_readme.py          # Pre-merge structural validator
-│   │   └── featured.json            # Curated ordering for the repo table
-│   └── workflows/                   # Scheduled automation (see below)
+│   └── scripts/
+│       ├── profile_common.py        # Shared API + marker helpers (stdlib only)
+│       ├── update_activity.py       # Daily public-activity renderer
+│       ├── update_repos.py          # Weekly repo table, counters, badge data
+│       ├── check_readme.py          # Pre-merge structural validator
+│       └── featured.json            # Curated ordering for the repo table
+├── scripts/
+│   └── enable-automation.sh         # Copies the workflow templates into place
 └── docs/
     ├── PROFILE_SETUP.md             # This operating guide
-    └── workflow-templates/          # Reference copies of the workflows
+    └── workflow-templates/          # Workflows, installed by the script above
 ```
+
+> The workflows are not committed under `.github/workflows/`. GitHub blocks
+> automated tooling from creating files there, so they ship as templates and
+> [`scripts/enable-automation.sh`](../scripts/enable-automation.sh) installs them
+> using your own credentials.
 
 ## Activation checklist
 
 Everything ships ready to run. Work through this list once.
 
 1. **Merge the change into `main`.** GitHub only renders the profile README from the default branch.
-2. Open **Settings → Actions → General → Workflow permissions** and select **Read and write permissions**. The activity, repository, snake, and blog jobs commit their own changes.
-3. Open **Actions → Generate contribution snake → Run workflow** once. This creates the `output` branch that hosts both snake SVGs; the module renders as soon as the job succeeds.
-4. Open **Actions → Refresh featured repositories → Run workflow** once. This seeds the counters and the repository table immediately instead of waiting for Monday.
-5. Open **Actions → Refresh profile activity → Run workflow** once to seed the activity feed.
-6. Check the profile in a private window on desktop and phone, in both GitHub Light and GitHub Dark.
+2. **Install the workflows.** Because GitHub does not let bots write to `.github/workflows/`, run:
+
+   ```bash
+   bash scripts/enable-automation.sh
+   git add .github/workflows
+   git commit -m "ci: enable profile automation"
+   git push
+   ```
+
+   Re-run the script any time a template changes; it only copies what differs.
+3. Open **Settings → Actions → General → Workflow permissions** and select **Read and write permissions**. The activity, repository, snake, and blog jobs commit their own changes.
+4. Open **Actions → Generate contribution snake → Run workflow** once. This creates the `output` branch that hosts both snake SVGs; the module renders as soon as the job succeeds.
+5. Open **Actions → Refresh featured repositories → Run workflow** once. This seeds the counters and the repository table immediately instead of waiting for Monday.
+6. Open **Actions → Refresh profile activity → Run workflow** once to seed the activity feed.
+7. Check the profile in a private window on desktop and phone, in both GitHub Light and GitHub Dark.
 
 > Never put email credentials, personal tokens, or API keys in `README.md`, workflow files, or repository variables. Everything here uses GitHub's scoped `GITHUB_TOKEN`, except WakaTime, which uses a repository **secret**.
 
@@ -47,12 +63,14 @@ Everything ships ready to run. Work through this list once.
 
 | Workflow | Schedule (UTC) | What it changes |
 | :-- | :-- | :-- |
-| [`update-activity.yml`](../.github/workflows/update-activity.yml) | Daily 02:17 | `<!-- ACTIVITY -->` block from the Events API |
-| [`update-repos.yml`](../.github/workflows/update-repos.yml) | Mondays 04:23 | `<!-- REPOS -->` table, `<!-- COUNTERS -->` badges, `data/*.json` |
-| [`generate-snake.yml`](../.github/workflows/generate-snake.yml) | Sundays 00:15 | Pushes both snake SVGs to the `output` branch |
-| [`update-blog.yml`](../.github/workflows/update-blog.yml) | Daily 03:31 | `<!-- BLOG-POST-LIST -->` block — only when `BLOG_RSS_URL` is set |
-| [`waka-readme.yml`](../.github/workflows/waka-readme.yml) | Daily 03:41 | `waka` block — only when `ENABLE_WAKATIME` is `true` |
-| [`profile-checks.yml`](../.github/workflows/profile-checks.yml) | Push / PR to `main` | Validates markers, assets, and generator idempotency |
+| [`update-activity.yml`](workflow-templates/update-activity.yml) | Daily 02:17 | `<!-- ACTIVITY -->` block from the Events API |
+| [`update-repos.yml`](workflow-templates/update-repos.yml) | Mondays 04:23 | `<!-- REPOS -->` table, `<!-- COUNTERS -->` badges, `data/*.json` |
+| [`generate-snake.yml`](workflow-templates/generate-snake.yml) | Sundays 00:15 | Pushes both snake SVGs to the `output` branch |
+| [`update-blog.yml`](workflow-templates/update-blog.yml) | Daily 03:31 | `<!-- BLOG-POST-LIST -->` block — only when `BLOG_RSS_URL` is set |
+| [`waka-readme.yml`](workflow-templates/waka-readme.yml) | Daily 03:41 | `waka` block — only when `ENABLE_WAKATIME` is `true` |
+| [`profile-checks.yml`](workflow-templates/profile-checks.yml) | Push / PR to `main` | Validates markers, assets, and generator idempotency |
+
+Schedules only take effect once the templates are installed via `scripts/enable-automation.sh`.
 
 Each scheduled job is guarded by its own `concurrency` group and commits only when its block actually changes, so the history stays readable.
 
@@ -73,7 +91,7 @@ Add modules only when they have a real signal. An empty dashboard is worse than 
 
 `update_repos.py` reads the public repositories API and writes three things.
 
-- The **repository table** is built from a curated ordering in [`.github/scripts/featured.json`](../.github/scripts/featured.json), then topped up with the most recently pushed repositories that have a description or topics. Scratch repositories created from a template — no description, no topics, no stars — are kept off the profile.
+- The **repository table** is built from a curated ordering in [`featured.json`](../.github/scripts/featured.json), then topped up with the most recently pushed repositories that have a description or topics. Scratch repositories created from a template — no description, no topics, no stars — are kept off the profile.
 - The **counter badges** are regenerated with the current numbers baked in, so they render even if a badge service is having a bad day.
 - **`data/*.json`** files are published in Shields' `endpoint` schema. Any other repository can then embed a live badge, for example:
 
