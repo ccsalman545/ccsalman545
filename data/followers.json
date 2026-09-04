@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "label": "followers",
+  "message": "2",
+  "color": "24292f",
+  "cacheSeconds": 43200,
+  "style": "flat-square",
+  "namedLogo": "github"
+}

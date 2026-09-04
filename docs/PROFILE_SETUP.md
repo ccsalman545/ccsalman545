@@ -1,128 +1,187 @@
 # Profile README operations guide
 
-This repository is a **GitHub profile repository** because its name exactly matches the account name: `ccsalman545`. GitHub renders the root [`README.md`](../README.md) above the repositories list at [github.com/ccsalman545](https://github.com/ccsalman545).
+This repository is a **GitHub profile repository** because its name matches the account name exactly: `ccsalman545`. GitHub renders the root [`README.md`](../README.md) above the repositories list at [github.com/ccsalman545](https://github.com/ccsalman545).
 
-The profile is designed to work as a clean static README immediately, with a few optional dynamic modules that make it feel alive over time.
+The profile is a **static README with dynamic modules**. Plain Markdown carries all the meaning; scheduled workflows refresh the numbers, the repository table, and the activity feed so the page stays honest without manual edits.
 
 ## Repository layout
 
 ```text
 ccsalman545/
-├── README.md                              # Public profile shown on GitHub
+├── README.md                        # Public profile shown on GitHub
+├── assets/                          # Hand-built, theme-aware SVG artwork
+│   ├── banner-dark.svg              # 1280×320 hero, dark theme
+│   ├── banner-light.svg             # 1280×320 hero, light theme
+│   ├── divider-dark.svg             # Section rule, dark theme
+│   └── divider-light.svg            # Section rule, light theme
+├── data/                            # Generated Shields.io endpoint payloads
+│   ├── stars.json forks.json repos.json
+│   └── followers.json languages.json updated.json
 ├── .github/
 │   └── scripts/
-│       └── update_activity.py             # Standard-library activity renderer
+│       ├── profile_common.py        # Shared API + marker helpers (stdlib only)
+│       ├── update_activity.py       # Daily public-activity renderer
+│       ├── update_repos.py          # Weekly repo table, counters, badge data
+│       ├── check_readme.py          # Pre-merge structural validator
+│       └── featured.json            # Curated ordering for the repo table
+├── scripts/
+│   └── enable-automation.sh         # Copies the workflow templates into place
 └── docs/
-    ├── PROFILE_SETUP.md                   # This operating guide
-    └── workflow-templates/                # Copy into .github/workflows manually
-        ├── generate-snake.yml             # Weekly contribution snake → output branch
-        ├── update-activity.yml            # Daily public activity refresh
-        └── update-blog.yml                # RSS/Atom latest-writing refresh
+    ├── PROFILE_SETUP.md             # This operating guide
+    └── workflow-templates/          # Workflows, installed by the script above
 ```
 
-## First-time activation
+> The workflows are not committed under `.github/workflows/`. GitHub blocks
+> automated tooling from creating files there, so they ship as templates and
+> [`scripts/enable-automation.sh`](../scripts/enable-automation.sh) installs them
+> using your own credentials.
 
-1. **Merge the profile change into `main`.** GitHub only renders the profile README from the repository's default branch.
-2. The GitHub App used for this PR cannot write live workflow files. As the repository owner, add them through GitHub’s web editor after merging:
-   - open **Code → Add file → Create new file**;
-   - create `.github/workflows/generate-snake.yml`, then paste the matching [`generate-snake.yml`](workflow-templates/generate-snake.yml) template;
-   - repeat for [`update-activity.yml`](workflow-templates/update-activity.yml) and [`update-blog.yml`](workflow-templates/update-blog.yml).
-3. In the repository, open **Settings → Actions → General → Workflow permissions** and select **Read and write permissions**. Save the setting. The activity and blog jobs need permission to commit their README updates.
-4. Open **Actions**, select **Generate contribution snake**, then choose **Run workflow** once. This creates or refreshes the `output` branch that hosts the snake SVGs. The README’s snake module will work as soon as this job succeeds.
-5. To enable latest writing, open **Settings → Secrets and variables → Actions → Variables**, create `BLOG_RSS_URL`, and set it to a public RSS or Atom feed URL. Then run **Refresh latest writing** once. The workflow intentionally does nothing until this variable is present.
-6. Optionally run **Refresh profile activity** once to seed the activity panel before the next scheduled run.
-7. Open the profile in an incognito/private browser on a desktop and phone. This verifies the public view rather than a cached logged-in view.
+## Activation checklist
 
-> Do not put email credentials, personal tokens, or API keys in `README.md`, workflow files, or repository variables. The templates use GitHub’s scoped `GITHUB_TOKEN` only.
+Everything ships ready to run. Work through this list once.
+
+1. **Merge the change into `main`.** GitHub only renders the profile README from the default branch.
+2. **Install the workflows.** Because GitHub does not let bots write to `.github/workflows/`, run:
+
+   ```bash
+   bash scripts/enable-automation.sh
+   git add .github/workflows
+   git commit -m "ci: enable profile automation"
+   git push
+   ```
+
+   Re-run the script any time a template changes; it only copies what differs.
+3. Open **Settings → Actions → General → Workflow permissions** and select **Read and write permissions**. The activity, repository, snake, and blog jobs commit their own changes.
+4. Open **Actions → Generate contribution snake → Run workflow** once. This creates the `output` branch that hosts both snake SVGs; the module renders as soon as the job succeeds.
+5. Open **Actions → Refresh featured repositories → Run workflow** once. This seeds the counters and the repository table immediately instead of waiting for Monday.
+6. Open **Actions → Refresh profile activity → Run workflow** once to seed the activity feed.
+7. Check the profile in a private window on desktop and phone, in both GitHub Light and GitHub Dark.
+
+> Never put email credentials, personal tokens, or API keys in `README.md`, workflow files, or repository variables. Everything here uses GitHub's scoped `GITHUB_TOKEN`, except WakaTime, which uses a repository **secret**.
 
 ## Automation schedule
 
-| Workflow template | Schedule (UTC) | What it changes | Required setup |
-| :-- | :-- | :-- | :-- |
-| [`generate-snake.yml`](workflow-templates/generate-snake.yml) | Sundays, 00:15 | Publishes two SVG snake files to `output` | Copy it to `.github/workflows`, then run once |
-| [`update-activity.yml`](workflow-templates/update-activity.yml) | Daily, 02:17 | Replaces the `ACTIVITY` marker block in the README | Copy it to `.github/workflows`; Actions write permission |
-| [`update-blog.yml`](workflow-templates/update-blog.yml) | Daily, 03:31 | Replaces the `BLOG-POST-LIST` marker block | Copy it to `.github/workflows`; write permission + `BLOG_RSS_URL` |
-
-The activity script skips commits made to this profile repository so the feed does not become a loop of its own automated refreshes. It uses the public GitHub Events API and Python’s standard library only.
-
-## Widget and badge sources
-
-Every visual module is linked from the profile README and is intentionally sourced from a service with a public, documented URL.
-
-| Module | Provider / source | Configuration in this profile |
+| Workflow | Schedule (UTC) | What it changes |
 | :-- | :-- | :-- |
-| Hero banner | [Capsule Render](https://github.com/kyechan99/capsule-render) | Header text, blue/indigo gradient, descriptive subtitle |
-| Animated roles | [readme-typing-svg](https://github.com/DenverCoder1/readme-typing-svg) | JetBrains Mono, 2.8-second rotation, six role messages |
-| Technology / CTA badges | [Shields.io](https://shields.io/) | `flat-square` for the compact dashboard feel; `for-the-badge` for primary actions |
-| GitHub stats and language summary | [GitHub Readme Stats](https://github.com/anuraghazra/github-readme-stats) | Public data, GitHub-dark cards, icons and compact language list |
-| Contribution streak | [streak-stats](https://github.com/DenverCoder1/github-readme-streak-stats) | GitHub-dark-blue theme |
-| Activity graph | [github-readme-activity-graph](https://github.com/Ashutosh00710/github-readme-activity-graph) | Dark high-contrast line graph |
-| Trophies | [github-profile-trophy](https://github.com/ryo-ma/github-profile-trophy) | One compact row with no frame |
-| Profile view counter | [komarev profile counter](https://github.com/antonkomarev/github-profile-views-counter) | Optional public visit count |
-| Contribution snake | [Platane/snk](https://github.com/Platane/snk) | Generated weekly after copying the template into `.github/workflows`, then published to `output` |
-| Latest posts | [blog-post-workflow](https://github.com/gautamkrishnar/blog-post-workflow) | Uses the RSS/Atom URL in `BLOG_RSS_URL` after the template is activated |
+| [`update-activity.yml`](workflow-templates/update-activity.yml) | Daily 02:17 | `<!-- ACTIVITY -->` block from the Events API |
+| [`update-repos.yml`](workflow-templates/update-repos.yml) | Mondays 04:23 | `<!-- REPOS -->` table, `<!-- COUNTERS -->` badges, `data/*.json` |
+| [`generate-snake.yml`](workflow-templates/generate-snake.yml) | Sundays 00:15 | Pushes both snake SVGs to the `output` branch |
+| [`update-blog.yml`](workflow-templates/update-blog.yml) | Daily 03:31 | `<!-- BLOG-POST-LIST -->` block, only when `BLOG_RSS_URL` is set |
+| [`waka-readme.yml`](workflow-templates/waka-readme.yml) | Daily 03:41 | `waka` block, only when `ENABLE_WAKATIME` is `true` |
+| [`profile-checks.yml`](workflow-templates/profile-checks.yml) | Push / PR to `main` | Validates markers, assets, and generator idempotency |
 
-### Theme and reliability notes
+Schedules only take effect once the templates are installed via `scripts/enable-automation.sh`.
 
-- The dashboard cards intentionally use a dark card surface. That creates reliable contrast when GitHub itself is in either Light or Dark mode.
-- External badge/widget services can occasionally be rate-limited or unavailable. The important content remains plain Markdown text and links, so the profile is still useful without imagery.
-- `count_private=true` on the stats URL cannot expose private contributions without the widget host being configured with a private token; no private token is supplied here. Public data remains the intended default.
-- The profile-views badge is optional. Remove its line from the README if visit tracking is not wanted.
+Each scheduled job is guarded by its own `concurrency` group and commits only when its block actually changes, so the history stays readable.
 
-## Custom banner recommendations
+## Optional modules
 
-The current banner is generated by Capsule Render, so there is no asset to maintain. For a distinctive custom banner later:
+| Module | How to switch it on |
+| :-- | :-- |
+| Latest articles | **Settings → Secrets and variables → Actions → Variables** → create `BLOG_RSS_URL` with a public RSS/Atom URL. Then run *Refresh latest writing*. |
+| Coding activity (WakaTime) | Create the `WAKATIME_API_KEY` repository **secret**, then the `ENABLE_WAKATIME` repository **variable** set to `true`. Then run *Refresh coding activity*. |
+| Profile view counter | Already on. Delete the `komarev.com/ghpvc` badge from the header if visit tracking is not wanted. |
+| Sponsor button | Add a `FUNDING.yml` only after a genuine [GitHub Sponsors](https://github.com/sponsors) profile exists. |
 
-1. Design at **1280 × 320 px** (or 1600 × 400 px) with all text inside a centered **960 × 220 px safe area**. GitHub scales images down aggressively on mobile.
-2. Use a deep navy base (`#0D1117`), one blue accent (`#58A6FF`), and one indigo accent (`#6E40C9`). Keep body text near `#F6F8FA` for contrast.
-3. Include only the name, a short role, and one visual motif—such as PCB traces fading into a terminal grid. Do not bake small social links or dense technology lists into the image.
-4. Export an optimized SVG or PNG below 500 KB and place it at `assets/profile-banner.png` if a local asset is preferred.
-5. Replace the first Capsule Render image in `README.md` with:
+Add modules only when they have a real signal. An empty dashboard is worse than a smaller one.
 
-   ```md
-   [![Muhammed Salman CC — Embedded systems, Linux & intelligent hardware](assets/profile-banner.png)](https://muhammed-salman-cc.is-a.dev)
-   ```
+## How the dynamic blocks work
 
-6. Check both GitHub themes, a narrow mobile viewport, and the profile page’s social preview before publishing.
+### Featured repositories and counters
 
-**Suggested art direction:** a calm dark terminal canvas; subtle cobalt signal traces; a single FPGA/IC outline; no gradients behind small text; and generous empty space. It should feel like a precise engineering instrument, not a poster.
+`update_repos.py` reads the public repositories API and writes three things.
 
-## Optional dynamic modules
+- The **repository table** is built from a curated ordering in [`featured.json`](../.github/scripts/featured.json), then topped up with the most recently pushed repositories that have a description or topics. Scratch repositories created from a template (no description, no topics, no stars) are kept off the profile.
+- The **counter badges** are regenerated with the current numbers baked in, so they render even if a badge service is having a bad day.
+- **`data/*.json`** files are published in Shields' `endpoint` schema. Any other repository can then embed a live badge, for example:
 
-Add only modules that have a genuine signal; an empty dashboard is worse than a smaller one.
+  ```md
+  [![Stars](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fccsalman545%2Fccsalman545%2Fmain%2Fdata%2Fstars.json)](https://github.com/ccsalman545?tab=repositories)
+  ```
 
-| Module | Safe approach | What is needed |
+To change which repositories lead the table, edit `pinned` in `featured.json`. The list also accepts a runtime override through the `FEATURED_REPOS` environment variable (comma-separated names).
+
+### Activity feed
+
+`update_activity.py` reads the public Events API and renders the most recent meaningful events. Two filters keep it useful:
+
+- commits to this profile repository are skipped, so the feed never becomes a loop of its own automated refreshes;
+- creating a default branch (`main`, `master`, `develop`) is skipped, because that is an artefact of initialising a repository rather than news.
+
+Events on repositories that carry a description, topics, or stars are ranked first. If that yields too few items the newest remaining events top the list up, so the panel is never empty.
+
+## Theme-aware rendering
+
+Every card and piece of artwork ships two variants and is swapped with `<picture>` plus a `prefers-color-scheme` media query:
+
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/banner-light.svg">
+  <img src="assets/banner-dark.svg" alt="…" width="100%">
+</picture>
+```
+
+The result looks native in both GitHub themes. When you add a new card, follow the same pattern rather than picking one theme and hoping for the best.
+
+## Custom artwork
+
+The banner is a hand-written SVG, so there is no binary asset to maintain and it stays sharp at any scale.
+
+- **Canvas:** 1280 × 320 px. Keep all text inside a centred 960 × 220 px safe area. GitHub scales images down hard on mobile.
+- **Palette:** navy base `#0D1117`, blue accent `#58A6FF`, indigo accent `#6E40C9`, body text near `#F6F8FA`. Light variant: white base, `#0969DA` accent, `#3D4854` body text.
+- **Type:** monospace throughout, matching the terminal framing.
+- **Keep it calm:** one motif (PCB traces into an IC), generous empty space, no gradients behind small text, no baked-in social links.
+
+`banner-dark.svg` and `banner-light.svg` must stay structurally identical (same coordinates, different colours) or the theme swap will visibly jump.
+
+## Widget sources
+
+Every remote widget is a service with a public, documented URL. If one becomes unreliable, remove that line; the prose underneath still stands on its own.
+
+| Module | Provider | Notes |
 | :-- | :-- | :-- |
-| Latest articles | The RSS/Atom workflow template | Copy it into `.github/workflows` and set a public `BLOG_RSS_URL` repository variable |
-| Recent commits/activity | The activity workflow template | Copy it into `.github/workflows`; then enable Actions write permission |
-| WakaTime coding activity | [athul/waka-readme](https://github.com/athul/waka-readme) | A `WAKATIME_API_KEY` repository secret; never expose it in README |
-| Holopin badges | [Holopin embed guide](https://www.holopin.io/) | A real Holopin board URL after badges are earned |
-| Spotify now playing | [novatorem](https://github.com/novatorem/novatorem) | A public Spotify identity plus Spotify API credentials stored as secrets |
-| Random developer quote | [quote-readme](https://github.com/PiyushSuthar/github-readme-quotes) | Optional image link; prefer a stable personal quote if consistency matters |
-| Weather | A self-hosted or privacy-reviewed provider | Use only a city-level location; do not expose precise location data |
-| Sponsor section | [GitHub Sponsors](https://github.com/sponsors) | A genuine sponsor profile before adding a funding badge |
+| Animated roles | [readme-typing-svg](https://github.com/DenverCoder1/readme-typing-svg) | Two colour variants matched to each theme |
+| Badges | [Shields.io](https://shields.io/) | `flat-square` in the body, `for-the-badge` for primary actions |
+| Stats & languages | [github-readme-stats](https://github.com/anuraghazra/github-readme-stats) | `theme=github_dark` / `theme=default` |
+| Contribution streak | [streak-stats](https://github.com/DenverCoder1/github-readme-streak-stats) | `theme=github-dark-blue` / `theme=github-light` |
+| Trophies | [github-profile-trophy](https://github.com/ryo-ma/github-profile-trophy) | `theme=onedark` / `theme=flat`, one row |
+| Activity graph | [github-readme-activity-graph](https://github.com/Ashutosh00710/github-readme-activity-graph) | Explicit colours per theme |
+| Contribution snake | [Platane/snk](https://github.com/Platane/snk) | Generated weekly onto the `output` branch |
+| Profile views | [komarev counter](https://github.com/antonkomarev/github-profile-views-counter) | Optional; remove if unwanted |
+| Latest posts | [blog-post-workflow](https://github.com/gautamkrishnar/blog-post-workflow) | Needs `BLOG_RSS_URL` |
+| Coding activity | [waka-readme](https://github.com/athul/waka-readme) | Needs `WAKATIME_API_KEY` + `ENABLE_WAKATIME` |
+
+`count_private=true` on the stats URL cannot expose private contributions unless the widget host itself is configured with a private token. No token is supplied here, so public data remains the default.
 
 ## Content maintenance checklist
 
-Review the README at the start of each semester or after any significant project release:
+Review at the start of each semester, or after any significant release.
 
-- Replace “exploring” badges with demonstrated skills only when the work is published.
+- Replace "exploring" badges with demonstrated skills only once the work is published.
 - Keep project status labels (`active`, `experimenting`, `live`) accurate.
-- Update the learning roadmap honestly—its value is clarity, not high percentages.
+- Update the learning roadmap honestly. Its value is clarity, not high percentages.
 - Add a blog feed only after at least one public post exists.
-- Remove external widgets that have become unreliable or no longer support the profile.
-- Keep contact links and the portfolio URL current.
-- Add a pinned repository only after its README, license, setup steps, and screenshots or diagrams are ready.
+- Re-pin the featured list in `featured.json` when a new project becomes the headline.
+- Delete external widgets that have stopped working; do not leave broken images.
+- Keep the portfolio URL, email, and LinkedIn links current.
 
 ## Local checks
 
-There is no build dependency for the profile README. Before committing, run:
+There are no dependencies to install. Before committing:
 
 ```bash
-python3 .github/scripts/update_activity.py
-python3 -m py_compile .github/scripts/update_activity.py
-git diff --check
-git status --short
+python3 -m compileall -q .github/scripts
+python3 .github/scripts/check_readme.py
+python3 .github/scripts/update_activity.py     # needs network
+python3 .github/scripts/update_repos.py        # needs network
+git diff --check && git status --short
 ```
 
-The first command needs network access to GitHub’s public Events API. In Actions it receives the short-lived `GITHUB_TOKEN` automatically. Locally it also works unauthenticated for normal use, subject to GitHub’s public rate limits.
+The two generator scripts talk to the public GitHub API. They work unauthenticated within GitHub's public rate limit and use `GITHUB_TOKEN` automatically when one is present. Both are idempotent: running them twice in a row leaves no diff, which is exactly what the `profile-checks` workflow asserts.
+
+To point the scripts at a different account without editing them:
+
+```bash
+PROFILE_USERNAME=someone-else python3 .github/scripts/update_repos.py
+```

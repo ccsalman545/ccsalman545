@@ -1,0 +1,52 @@
+name: Profile checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out profile repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile the generator scripts
+        run: python3 -m compileall -q .github/scripts
+
+      - name: Validate README structure and assets
+        run: python3 .github/scripts/check_readme.py
+
+      - name: Confirm the generators are idempotent
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROFILE_USERNAME: ccsalman545
+        run: |
+          python3 .github/scripts/update_activity.py
+          python3 .github/scripts/update_repos.py
+          if ! git diff --quiet -- README.md data; then
+            echo "::error::A generator produced a diff on a clean checkout."
+            echo "Run both scripts locally and commit the result."
+            git --no-pager diff --stat -- README.md data
+            exit 1
+          fi
+          echo "Generators are idempotent."
+
+      - name: Report unused relative assets
+        run: |
+          missing=0
+          for asset in $(find assets -type f -name '*.svg'); do
+            grep -qF "$asset" README.md || { echo "::warning::Asset not referenced by README: $asset"; missing=1; }
+          done
+          exit 0

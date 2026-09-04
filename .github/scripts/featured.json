@@ -1,0 +1,10 @@
+{
+  "_comment": "Repositories listed here are pinned to the top of the profile's featured table, in this order. Remaining slots are filled automatically with the most recently pushed repositories that have a description or topics. Override the whole list at runtime with the FEATURED_REPOS environment variable (comma-separated names).",
+  "pinned": [
+    "Linux-Scripts",
+    "Embedded-Projects",
+    "FPGA-Vision-Processing",
+    "muhammed-salman-portfolio",
+    "Arduino-IoT"
+  ]
+}

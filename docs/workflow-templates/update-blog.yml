@@ -14,19 +14,20 @@ concurrency:
 
 jobs:
   refresh:
-    # Configure Settings → Secrets and variables → Actions → Variables → BLOG_RSS_URL first.
+    # Set Settings → Secrets and variables → Actions → Variables → BLOG_RSS_URL
+    # to a public RSS or Atom feed before this job does anything.
     if: ${{ vars.BLOG_RSS_URL != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out profile repository
         uses: actions/checkout@v4
 
-      - name: Update the writing section from RSS or Atom
+      - name: Update the writing section from the feed
         uses: gautamkrishnar/blog-post-workflow@v1
         with:
           feed_list: ${{ vars.BLOG_RSS_URL }}
           max_post_count: 4
-          template: "$newline- [$title]($url) — $date"
+          template: "$newline- [$title]($url), $date"
           comment_tag_name: "BLOG-POST-LIST"
           commit_message: "chore: refresh latest writing [skip ci]"
           enable_keepalive: false

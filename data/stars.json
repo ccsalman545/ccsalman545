@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "label": "stars",
+  "message": "0",
+  "color": "6e40c9",
+  "cacheSeconds": 43200,
+  "style": "flat-square",
+  "namedLogo": "github"
+}
