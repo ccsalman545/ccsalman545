@@ -1,0 +1,35 @@
+name: Refresh coding activity
+
+on:
+  schedule:
+    - cron: "41 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-wakatime
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    # Opt in by creating the WAKATIME_API_KEY repository *secret* and setting
+    # the ENABLE_WAKATIME repository *variable* to "true". Until then the panel
+    # keeps its placeholder text and this job never runs.
+    if: ${{ vars.ENABLE_WAKATIME == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out profile repository
+        uses: actions/checkout@v4
+
+      - name: Update the WakaTime panel
+        uses: athul/waka-readme@master
+        with:
+          WAKATIME_API_KEY: ${{ secrets.WAKATIME_API_KEY }}
+          BLOCKS: "░▒▓█"
+          TIME_RANGE: last_7_days
+          SHOW_TITLE: true
+          SHOW_TIME: true
+          SHOW_TOTAL: true
+          COMMIT_MESSAGE: "chore: refresh coding activity [skip ci]"

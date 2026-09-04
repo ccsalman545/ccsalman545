@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320"
+     role="img" aria-label="Muhammed Salman CC — M.Sc. Electronics at CUSAT — Embedded Systems, Linux, Robotics">
+  <title>Muhammed Salman CC — M.Sc. Electronics at CUSAT</title>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.55" stop-color="#F6F8FA"/>
+      <stop offset="1" stop-color="#EEF3F9"/>
+    </linearGradient>
+
+    <radialGradient id="glowA" cx="0.06" cy="0.08" r="0.75">
+      <stop offset="0" stop-color="#58A6FF" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#58A6FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="glowB" cx="0.97" cy="0.92" r="0.65">
+      <stop offset="0" stop-color="#6E40C9" stop-opacity="0.13"/>
+      <stop offset="1" stop-color="#6E40C9" stop-opacity="0"/>
+    </radialGradient>
+
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#D0D7DE" stroke-width="1" stroke-opacity="0.85"/>
+    </pattern>
+
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0969DA"/>
+      <stop offset="0.55" stop-color="#6E40C9"/>
+      <stop offset="1" stop-color="#6E40C9" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="titleFill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0D1117"/>
+      <stop offset="1" stop-color="#33404F"/>
+    </linearGradient>
+
+    <linearGradient id="traceFade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0969DA" stop-opacity="0.12"/>
+      <stop offset="0.45" stop-color="#0969DA" stop-opacity="0.62"/>
+      <stop offset="1" stop-color="#0969DA" stop-opacity="0.62"/>
+    </linearGradient>
+
+    <filter id="dotGlow" x="-300%" y="-300%" width="700%" height="700%">
+      <feGaussianBlur stdDeviation="3.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <path id="busA" d="M 0 58 H 820 L 900 138 H 996"/>
+    <path id="busB" d="M 0 88 H 760 L 840 168 H 996"/>
+    <path id="busC" d="M 0 306 H 700 L 802 198 H 996"/>
+    <path id="busMain" d="M 0 88 H 760 L 840 168 H 996 L 1190 168 H 1280"/>
+  </defs>
+
+  <!-- canvas -->
+  <rect width="1280" height="320" fill="url(#bg)"/>
+  <rect width="1280" height="320" fill="url(#grid)"/>
+  <rect width="1280" height="320" fill="url(#glowA)"/>
+  <rect width="1280" height="320" fill="url(#glowB)"/>
+
+  <!-- copper traces -->
+  <g fill="none" stroke="url(#traceFade)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <use href="#busA"/>
+    <use href="#busB"/>
+    <use href="#busC"/>
+    <path d="M 1190 138 H 1280"/>
+    <path d="M 1190 168 H 1280"/>
+    <path d="M 1190 198 H 1280"/>
+  </g>
+
+  <!-- vias -->
+  <g fill="#FFFFFF" stroke="#0969DA" stroke-width="1.4" stroke-opacity="0.7">
+    <circle cx="820" cy="58" r="3.4"/>
+    <circle cx="760" cy="88" r="3.4"/>
+    <circle cx="700" cy="306" r="3.4"/>
+  </g>
+
+  <!-- decoupling cap motif -->
+  <g stroke="#0969DA" stroke-opacity="0.4" stroke-width="1.4" fill="none">
+    <path d="M 640 306 V 288"/>
+    <path d="M 626 288 H 654"/>
+    <path d="M 626 296 H 654"/>
+  </g>
+
+  <!-- IC -->
+  <g>
+    <rect x="1010" y="118" width="180" height="100" rx="9" fill="#FFFFFF" stroke="#0969DA" stroke-opacity="0.8" stroke-width="1.6"/>
+    <g fill="#0969DA" fill-opacity="0.7">
+      <rect x="996" y="133" width="14" height="6" rx="1.5"/>
+      <rect x="996" y="163" width="14" height="6" rx="1.5"/>
+      <rect x="996" y="193" width="14" height="6" rx="1.5"/>
+      <rect x="1190" y="133" width="14" height="6" rx="1.5"/>
+      <rect x="1190" y="163" width="14" height="6" rx="1.5"/>
+      <rect x="1190" y="193" width="14" height="6" rx="1.5"/>
+    </g>
+    <rect x="1032" y="140" width="136" height="56" rx="4" fill="none" stroke="#0969DA" stroke-opacity="0.28" stroke-width="1.2"/>
+    <rect x="1082" y="152" width="36" height="32" rx="2" fill="#0969DA" fill-opacity="0.08" stroke="#0969DA" stroke-opacity="0.5" stroke-width="1.2"/>
+    <circle cx="1022" cy="128" r="3" fill="#6E40C9"/>
+  </g>
+
+  <!-- travelling signal -->
+  <g filter="url(#dotGlow)">
+    <circle r="4" fill="#0969DA">
+      <animateMotion dur="7s" repeatCount="indefinite" path="M 0 88 H 760 L 840 168 H 996 L 1190 168 H 1280"/>
+    </circle>
+    <circle r="2.6" fill="#8250DF" opacity="0.9">
+      <animateMotion dur="7s" begin="2.4s" repeatCount="indefinite" path="M 0 58 H 820 L 900 138 H 996"/>
+    </circle>
+  </g>
+
+  <!-- wordmark -->
+  <g font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace">
+    <text x="72" y="118" font-size="14" letter-spacing="4.5" fill="#0969DA" fill-opacity="0.95">
+      // PROFILE · CUSAT · KERALA, IN
+    </text>
+
+    <text x="70" y="184" font-size="46" font-weight="700" letter-spacing="1.5" fill="url(#titleFill)">
+      MUHAMMED SALMAN CC
+    </text>
+
+    <rect x="72" y="204" width="520" height="4" rx="2" fill="url(#accent)"/>
+
+    <text x="72" y="248" font-size="19" letter-spacing="0.4" fill="#3D4854">
+      M.Sc. Electronics · Cochin University of Science and Technology
+    </text>
+
+    <text x="72" y="276" font-size="15.5" letter-spacing="0.6" fill="#57606A">
+      Embedded Systems  ·  Embedded Linux  ·  Robotics  ·  FPGA  ·  Open Source
+    </text>
+  </g>
+
+  <!-- prompt cursor -->
+  <rect x="72" y="292" width="9" height="17" fill="#0969DA">
+    <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.5;0.5;1" dur="1.15s" repeatCount="indefinite"/>
+  </rect>
+</svg>

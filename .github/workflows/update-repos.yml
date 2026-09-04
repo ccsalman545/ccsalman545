@@ -1,0 +1,39 @@
+name: Refresh featured repositories
+
+on:
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-repos
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out profile repository
+        uses: actions/checkout@v4
+
+      - name: Rebuild the repository table, counters, and badge data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROFILE_USERNAME: ccsalman545
+        run: python3 .github/scripts/update_repos.py
+
+      - name: Commit whatever changed
+        run: |
+          if git diff --quiet -- README.md data; then
+            echo "Repository showcase is already current."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md data
+          git commit -m "chore: refresh featured repositories [skip ci]"
+          git push

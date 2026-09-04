@@ -1,0 +1,3 @@
+# Python bytecode from the profile generator scripts
+__pycache__/
+*.py[cod]
