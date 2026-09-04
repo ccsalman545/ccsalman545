@@ -66,8 +66,8 @@ Everything ships ready to run. Work through this list once.
 | [`update-activity.yml`](workflow-templates/update-activity.yml) | Daily 02:17 | `<!-- ACTIVITY -->` block from the Events API |
 | [`update-repos.yml`](workflow-templates/update-repos.yml) | Mondays 04:23 | `<!-- REPOS -->` table, `<!-- COUNTERS -->` badges, `data/*.json` |
 | [`generate-snake.yml`](workflow-templates/generate-snake.yml) | Sundays 00:15 | Pushes both snake SVGs to the `output` branch |
-| [`update-blog.yml`](workflow-templates/update-blog.yml) | Daily 03:31 | `<!-- BLOG-POST-LIST -->` block — only when `BLOG_RSS_URL` is set |
-| [`waka-readme.yml`](workflow-templates/waka-readme.yml) | Daily 03:41 | `waka` block — only when `ENABLE_WAKATIME` is `true` |
+| [`update-blog.yml`](workflow-templates/update-blog.yml) | Daily 03:31 | `<!-- BLOG-POST-LIST -->` block, only when `BLOG_RSS_URL` is set |
+| [`waka-readme.yml`](workflow-templates/waka-readme.yml) | Daily 03:41 | `waka` block, only when `ENABLE_WAKATIME` is `true` |
 | [`profile-checks.yml`](workflow-templates/profile-checks.yml) | Push / PR to `main` | Validates markers, assets, and generator idempotency |
 
 Schedules only take effect once the templates are installed via `scripts/enable-automation.sh`.
@@ -91,7 +91,7 @@ Add modules only when they have a real signal. An empty dashboard is worse than 
 
 `update_repos.py` reads the public repositories API and writes three things.
 
-- The **repository table** is built from a curated ordering in [`featured.json`](../.github/scripts/featured.json), then topped up with the most recently pushed repositories that have a description or topics. Scratch repositories created from a template — no description, no topics, no stars — are kept off the profile.
+- The **repository table** is built from a curated ordering in [`featured.json`](../.github/scripts/featured.json), then topped up with the most recently pushed repositories that have a description or topics. Scratch repositories created from a template (no description, no topics, no stars) are kept off the profile.
 - The **counter badges** are regenerated with the current numbers baked in, so they render even if a badge service is having a bad day.
 - **`data/*.json`** files are published in Shields' `endpoint` schema. Any other repository can then embed a live badge, for example:
 
@@ -128,12 +128,12 @@ The result looks native in both GitHub themes. When you add a new card, follow t
 
 The banner is a hand-written SVG, so there is no binary asset to maintain and it stays sharp at any scale.
 
-- **Canvas:** 1280 × 320 px. Keep all text inside a centred 960 × 220 px safe area — GitHub scales images down hard on mobile.
+- **Canvas:** 1280 × 320 px. Keep all text inside a centred 960 × 220 px safe area. GitHub scales images down hard on mobile.
 - **Palette:** navy base `#0D1117`, blue accent `#58A6FF`, indigo accent `#6E40C9`, body text near `#F6F8FA`. Light variant: white base, `#0969DA` accent, `#3D4854` body text.
 - **Type:** monospace throughout, matching the terminal framing.
 - **Keep it calm:** one motif (PCB traces into an IC), generous empty space, no gradients behind small text, no baked-in social links.
 
-`banner-dark.svg` and `banner-light.svg` must stay structurally identical — same coordinates, different colours — or the theme swap will visibly jump.
+`banner-dark.svg` and `banner-light.svg` must stay structurally identical (same coordinates, different colours) or the theme swap will visibly jump.
 
 ## Widget sources
 
@@ -158,9 +158,9 @@ Every remote widget is a service with a public, documented URL. If one becomes u
 
 Review at the start of each semester, or after any significant release.
 
-- Replace “exploring” badges with demonstrated skills only once the work is published.
+- Replace "exploring" badges with demonstrated skills only once the work is published.
 - Keep project status labels (`active`, `experimenting`, `live`) accurate.
-- Update the learning roadmap honestly — its value is clarity, not high percentages.
+- Update the learning roadmap honestly. Its value is clarity, not high percentages.
 - Add a blog feed only after at least one public post exists.
 - Re-pin the featured list in `featured.json` when a new project becomes the headline.
 - Delete external widgets that have stopped working; do not leave broken images.

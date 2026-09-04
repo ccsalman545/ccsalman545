@@ -145,7 +145,7 @@ def stack_chips(repo: dict, limit: int = 2) -> str:
         if len(chips) == limit:
             break
     if not chips:
-        return "—"
+        return "other"
     return " ".join(f"`{escape_cell(chip)}`" for chip in chips[:limit])
 
 

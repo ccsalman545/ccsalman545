@@ -62,31 +62,34 @@ def commit_headline(payload: dict) -> str | None:
     if not commits:
         return None
     message = (commits[0].get("message") or "").strip().splitlines()
-    return truncate(message[0], 68) if message and message[0] else None
+    return truncate(message[0], 60) if message and message[0] else None
 
 
-def event_summary(event: dict) -> str | None:
-    """Render the meaningful public event types as one concise Markdown line."""
+def event_summary(event: dict) -> tuple[str, str, str] | None:
+    """Return (label, subject, detail) for the event types worth showing."""
     repo_name = event.get("repo", {}).get("name", "")
     if is_profile_repo(repo_name):
         return None
 
     event_type = event.get("type")
     payload = event.get("payload", {})
-    repo_link = f"[{repo_name}](https://github.com/{repo_name})" if repo_name else "a repository"
+    url = f"https://github.com/{repo_name}" if repo_name else ""
+    subject = f"[{repo_name}]({url})" if repo_name else "a repository"
 
     if event_type == "PushEvent":
         count = len(payload.get("commits") or [])
         branch = (payload.get("ref") or "").removeprefix("refs/heads/")
-        where = f" to `{branch}`" if branch else ""
         if count:
             noun = "commit" if count == 1 else "commits"
             headline = commit_headline(payload)
-            suffix = f" — “{headline}”" if headline else ""
-            return f"**Push** — {count} {noun}{where} in {repo_link}{suffix}"
-        # The public Events API sometimes omits the commit list entirely.
-        # Report the reliable fact instead of a misleading "0 commits".
-        return f"**Push** — updated {repo_link}{where}"
+            detail = f"{count} {noun}, latest {headline}" if headline else f"{count} {noun}"
+            if branch:
+                detail += f" on `{branch}`"
+            return "Push", subject, detail
+        # The public Events API sometimes omits the commit list entirely. Report
+        # the reliable fact instead of a misleading "0 commits".
+        detail = f"updated `{branch}`" if branch else "updated"
+        return "Push", subject, detail
 
     if event_type == "CreateEvent":
         ref_type = payload.get("ref_type", "repository")
@@ -95,48 +98,47 @@ def event_summary(event: dict) -> str | None:
         # repository, not something a visitor cares about.
         if ref_type == "branch" and ref in {"main", "master", "develop"}:
             return None
-        target = f" `{ref}`" if ref else ""
-        return f"**Create** — created {ref_type}{target} in {repo_link}"
+        return "Create", subject, f"{ref_type} `{ref}`" if ref else ref_type
 
     if event_type == "PullRequestEvent":
         action = payload.get("action", "updated")
         pull_request = payload.get("pull_request") or {}
         number = pull_request.get("number")
-        url = pull_request.get("html_url")
-        reference = f"[#{number}]({url})" if number and url else "a pull request"
-        return f"**Pull request** — {action} {reference} in {repo_link}"
+        link = pull_request.get("html_url")
+        reference = f"[#{number}]({link})" if number and link else "a pull request"
+        return "Pull request", subject, f"{action} {reference}"
 
     if event_type == "IssuesEvent":
         action = payload.get("action", "updated")
         issue = payload.get("issue") or {}
         number = issue.get("number")
-        url = issue.get("html_url")
-        reference = f"[#{number}]({url})" if number and url else "an issue"
-        return f"**Issue** — {action} {reference} in {repo_link}"
+        link = issue.get("html_url")
+        reference = f"[#{number}]({link})" if number and link else "an issue"
+        return "Issue", subject, f"{action} {reference}"
 
     if event_type == "IssueCommentEvent":
         issue = payload.get("issue") or {}
         number = issue.get("number")
-        url = issue.get("html_url")
-        reference = f"[#{number}]({url})" if number and url else "an issue"
-        return f"**Comment** — commented on {reference} in {repo_link}"
+        link = issue.get("html_url")
+        reference = f"[#{number}]({link})" if number and link else "an issue"
+        return "Comment", subject, f"on {reference}"
 
     if event_type == "ReleaseEvent":
         release = payload.get("release") or {}
         tag = release.get("tag_name")
-        return f"**Release** — published `{tag}` in {repo_link}" if tag else f"**Release** — published a release in {repo_link}"
+        return "Release", subject, f"published `{tag}`" if tag else "published a release"
 
     if event_type == "WatchEvent":
-        return f"**Starred** — bookmarked {repo_link}"
+        return "Starred", subject, ""
 
     if event_type == "ForkEvent":
         forkee = payload.get("forkee") or {}
-        url = forkee.get("html_url")
-        target = f"[{repo_name}]({url})" if url else repo_link
-        return f"**Forked** — created a fork of {target}"
+        fork_url = forkee.get("html_url")
+        target = f"[{repo_name}]({fork_url})" if fork_url else subject
+        return "Forked", target, ""
 
     if event_type == "PublicEvent":
-        return f"**Open sourced** — made {repo_link} public"
+        return "Open sourced", subject, ""
 
     return None
 
@@ -145,8 +147,8 @@ def render_activity(events: list[dict], showable: set[str]) -> str:
     """Pick a varied set of the most recent meaningful events.
 
     Events on repositories that look like real work come first. If that leaves
-    the panel nearly empty, the newest remaining events top it up so the section
-    is never blank.
+    the panel nearly empty, the newest remaining events top it up so the
+    section is never blank.
     """
     preferred: list[str] = []
     fallback: list[str] = []
@@ -162,7 +164,13 @@ def render_activity(events: list[dict], showable: set[str]) -> str:
             continue
         seen.add(key)
 
-        line = f"- {summary} · {relative_day(event.get('created_at'))}"
+        label, subject, detail = summary
+        when = relative_day(event.get("created_at"))
+        if detail:
+            line = f"- **{label}** in {subject}: {detail}, {when}"
+        else:
+            line = f"- **{label}** {subject}, {when}"
+
         repo = event.get("repo", {}).get("name", "").split("/")[-1]
         (preferred if repo in showable else fallback).append(line)
 

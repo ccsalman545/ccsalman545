@@ -24,6 +24,27 @@ MARKERS = [
     ("<!--START_SECTION:waka-->", "<!--END_SECTION:waka-->"),
 ]
 
+# House style: no em dashes, no curly quotes, no stock AI phrasing.
+STYLE_RULES = [
+    ("\u2014", "em dash. Use a comma, a colon, a full stop, or split the sentence."),
+    ("\u2013", "en dash in prose. Use a hyphen or rewrite."),
+    ("\u201c", "curly opening quote. Use a straight quote."),
+    ("\u201d", "curly closing quote. Use a straight quote."),
+    ("\u2018", "curly opening apostrophe. Use a straight apostrophe."),
+    ("\u2019", "curly apostrophe. Use a straight apostrophe."),
+]
+
+# Phrasing that reads as machine-written. Keep the list tight so it does not
+# fire on ordinary technical writing.
+AI_PHRASES = [
+    "delve", "tapestry", "testament to", "underscores", "showcases", "showcasing",
+    "pivotal", "intricate", "fostering", "bolsters", "garnered", "myriad",
+    "plethora", "seamless", "seamlessly", "cutting-edge", "in the realm of",
+    "it is important to note", "it's important to note", "in conclusion",
+    "furthermore", "moreover", "a wide range of", "wide array of",
+    "serves as a", "stands as a", "nestled", "vibrant", "robust solution",
+]
+
 # GitHub's HTML pipeline removes these even though they are valid HTML.
 FORBIDDEN_PATTERNS = [
     (r"<style\b", "inline <style> tags are stripped by GitHub"),
@@ -71,9 +92,22 @@ def main() -> int:
         elif target.suffix.lower() == ".svg" and target.stat().st_size == 0:
             problems.append(f"SVG asset is empty: {path}")
 
+    seen_style: list[str] = []
+    for needle, reason in STYLE_RULES:
+        if needle in content:
+            seen_style.append(reason)
+    if seen_style:
+        problems.append("House style: " + "; ".join(sorted(set(seen_style))) + ".")
+
+    hits = sorted({phrase for phrase in AI_PHRASES if phrase in content.lower()})
+    if hits:
+        problems.append(
+            "Phrasing to rewrite (reads as machine-written): " + ", ".join(hits) + "."
+        )
+
     for pattern, reason in FORBIDDEN_PATTERNS:
         if re.search(pattern, content, re.IGNORECASE):
-            problems.append(f"README contains markup GitHub will remove — {reason}.")
+            problems.append(f"README contains markup GitHub will remove: {reason}.")
 
     if len(content.encode("utf-8")) > 512_000:
         problems.append("README exceeds 512 KB; GitHub will refuse to render it.")
